@@ -1,0 +1,114 @@
+---
+title: "Weight Lifting Exercises - Correctness Prediction"
+output:
+  html_document:
+    keep_md: yes
+---
+
+## Executive summary
+
+This project analyses the data provided in the [Weight Lifting Exercise Dataset](http://groupware.les.inf.puc-rio.br/har) and builds a machine learning model to predict whether the observed subjects performed weight lifts correctly or incorrectly (categorized into five levels from A to E).
+
+
+## Loading the data
+
+The data files are assumed to be in the working directory.
+
+```{r message=FALSE}
+train.raw <- read.csv('pml-training.csv', na.strings = c('NA', ''), header = TRUE)
+test.raw <- read.csv('pml-testing.csv', na.strings = c('NA', ''), header = TRUE)
+library(caret)
+library(randomForest)
+set.seed(666)
+
+barplot(table(train.raw$classe), main = 'Class distribution')
+```
+
+The distribution of the outcome variable `classe` is reasonably even.
+
+#### Choosing relevant predictors
+
+The model should predict the outcome `classe` (five levels from A to E). Having analyzed the raw data above, we conclude that many columns have missing values (NA or blank). In fact, almost all the values in these columns are missing. Some of these columns contain unnecessary information which can be derived from other columns (like standard deviation and variance). Some columns contain non-numeric data (such as 'user-name', 'new_window', etc.) or information which might not be relevant (such as 'timestamp'). These variables can safely be excluded from the list of potential predictors.
+
+Below is the list of predictors which are usable (the last variable is 'classe' and is the outcome):
+
+```{r}
+## analyze columns
+## commented to avoid verbose output
+#str(train.raw)
+
+predictors <- c('roll_belt', 'pitch_belt', 'yaw_belt', 'total_accel_belt',
+                          'gyros_belt_x', 'gyros_belt_y', 'gyros_belt_z',
+                          'accel_belt_x', 'accel_belt_y', 'accel_belt_z',
+                          'magnet_belt_x', 'magnet_belt_y', 'magnet_belt_z',
+                          'roll_arm', 'pitch_arm', 'yaw_arm', 
+                          'gyros_arm_x', 'gyros_arm_y', 'gyros_arm_z', 
+                          'accel_arm_x', 'accel_arm_y', 'accel_arm_z',
+                          'magnet_arm_x', 'magnet_arm_y', 'magnet_arm_z',
+                          'roll_dumbbell', 'pitch_dumbbell', 'yaw_dumbbell',
+                          'gyros_dumbbell_x', 'gyros_dumbbell_y', 'gyros_dumbbell_z',
+                          'accel_dumbbell_x', 'accel_dumbbell_y', 'accel_dumbbell_z',
+                          'magnet_dumbbell_x', 'magnet_dumbbell_y', 'magnet_dumbbell_z',
+                          'roll_forearm', 'pitch_forearm', 'yaw_forearm',
+                          'gyros_forearm_x', 'gyros_forearm_y', 'gyros_forearm_z',
+                          'accel_forearm_x', 'accel_forearm_y', 'accel_forearm_z',
+                          'magnet_forearm_x', 'magnet_forearm_y', 'magnet_forearm_z',
+                          'classe')
+
+train.raw <- train.raw[,predictors]
+test.raw <- test.raw[,predictors[-50]]
+```
+
+#### Splitting the training data set into training and cross validation sets
+
+In order to perform cross validation, the training data set is split into two data sets: for training (70% of the data) and validation (30%).
+
+```{r}
+inTrain <- createDataPartition(train.raw$classe, p = 0.7, list = FALSE)
+training <- train.raw[inTrain,]
+validation <- train.raw[-inTrain,]
+```
+
+## Training the prediction model
+
+#### Choosing a model
+
+Taking into account that our data contains 49 predictors, the **Random Forest method** is used, which is particlularly efficient in dealing with a large number of predictors.
+
+```{r message=FALSE}
+modFit <- randomForest(classe ~ ., data = training)
+```
+
+#### Estimating variable importance
+
+```{r}
+varImpPlot(modFit, n.var = 10, main = '10 Most Important Predictors')
+```
+
+## Applying the model to the validation set
+
+The model is applied to the validation set in order to check its performance.
+
+```{r}
+predictions <- predict(modFit, validation)
+confusionMatrix(predictions, validation$classe)
+```
+
+#### Out of sample error
+
+```{r}
+confusionMatrix(predictions, validation$classe)$overall['Accuracy']
+```
+
+The accuracy is over 99%. Consequently the out of sample error is less than 1%.
+
+## Prediction on the test set
+
+```{r}
+predict(modFit, test.raw)
+```
+
+## Conclusion
+
+The Random Forest algorithm is rather efficient for predicting how the observed subjects performed exercises based on the selected features and using an unseen data set.
+**Accuracy on the validation data is over 99% and out of sample error is less than 1%**. The model also **performed perfectly on the testing data** which was submitted as the second part of the course project.
