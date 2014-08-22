@@ -78,6 +78,25 @@ Taking into account that our data contains 49 predictors, the **Random Forest me
 
 ```r
 modFit <- randomForest(classe ~ ., data = training)
+modFit
+```
+
+```
+## 
+## Call:
+##  randomForest(formula = classe ~ ., data = training) 
+##                Type of random forest: classification
+##                      Number of trees: 500
+## No. of variables tried at each split: 7
+## 
+##         OOB estimate of  error rate: 0.46%
+## Confusion matrix:
+##      A    B    C    D    E class.error
+## A 3902    4    0    0    0    0.001024
+## B   12 2641    5    0    0    0.006396
+## C    0    6 2385    5    0    0.004591
+## D    0    0   23 2228    1    0.010657
+## E    0    0    2    5 2518    0.002772
 ```
 
 #### Estimating variable importance

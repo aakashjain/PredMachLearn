@@ -75,8 +75,9 @@ validation <- train.raw[-inTrain,]
 
 Taking into account that our data contains 49 predictors, the **Random Forest method** is used, which is particlularly efficient in dealing with a large number of predictors.
 
-```{r message=FALSE}
+```{r}
 modFit <- randomForest(classe ~ ., data = training)
+modFit
 ```
 
 #### Estimating variable importance

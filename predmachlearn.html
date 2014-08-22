@@ -113,7 +113,23 @@ validation &lt;- train.raw[-inTrain,]</code></pre>
 <div id="choosing-a-model" class="section level4">
 <h4>Choosing a model</h4>
 <p>Taking into account that our data contains 49 predictors, the <strong>Random Forest method</strong> is used, which is particlularly efficient in dealing with a large number of predictors.</p>
-<pre class="r"><code>modFit &lt;- randomForest(classe ~ ., data = training)</code></pre>
+<pre class="r"><code>modFit &lt;- randomForest(classe ~ ., data = training)
+modFit</code></pre>
+<pre><code>## 
+## Call:
+##  randomForest(formula = classe ~ ., data = training) 
+##                Type of random forest: classification
+##                      Number of trees: 500
+## No. of variables tried at each split: 7
+## 
+##         OOB estimate of  error rate: 0.46%
+## Confusion matrix:
+##      A    B    C    D    E class.error
+## A 3902    4    0    0    0    0.001024
+## B   12 2641    5    0    0    0.006396
+## C    0    6 2385    5    0    0.004591
+## D    0    0   23 2228    1    0.010657
+## E    0    0    2    5 2518    0.002772</code></pre>
 </div>
 <div id="estimating-variable-importance" class="section level4">
 <h4>Estimating variable importance</h4>
